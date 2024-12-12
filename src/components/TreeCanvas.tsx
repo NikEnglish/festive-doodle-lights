@@ -87,7 +87,7 @@ export const TreeCanvas: React.FC<TreeCanvasProps> = ({
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
-                  className="absolute"
+                  className="absolute z-10"
                   style={{
                     left: `${led.x + 20}px`,
                     top: `${led.y}px`,
@@ -98,11 +98,14 @@ export const TreeCanvas: React.FC<TreeCanvasProps> = ({
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56">
                 <div className="p-2 space-y-2">
+                  <label className="text-sm font-medium">Color</label>
                   <Input
                     type="color"
                     value={led.color}
                     onChange={(e) => onLedUpdate?.(index, { color: e.target.value })}
+                    className="h-10 cursor-pointer"
                   />
+                  <label className="text-sm font-medium">Brightness</label>
                   <Input
                     type="range"
                     min="0"
@@ -110,10 +113,15 @@ export const TreeCanvas: React.FC<TreeCanvasProps> = ({
                     step="0.1"
                     value={led.brightness || 1}
                     onChange={(e) => onLedUpdate?.(index, { brightness: parseFloat(e.target.value) })}
+                    className="cursor-pointer"
                   />
                   <Button 
                     variant="destructive"
-                    onClick={() => onLedRemove?.(index)}
+                    onClick={() => {
+                      onLedRemove?.(index);
+                      setSelectedLed(null);
+                    }}
+                    className="w-full"
                   >
                     Remove LED
                   </Button>
