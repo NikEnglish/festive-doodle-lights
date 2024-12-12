@@ -2,6 +2,8 @@ import { useState } from "react";
 import { TreeCanvas } from "@/components/TreeCanvas";
 import { Controls } from "@/components/Controls";
 import { useToast } from "@/hooks/use-toast";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface LED {
   x: number;
@@ -16,17 +18,32 @@ const Index = () => {
   const [width, setWidth] = useState(300);
   const [height, setHeight] = useState(400);
   const [leds, setLeds] = useState<LED[]>([]);
+  const [showControls, setShowControls] = useState(true);
   const { toast } = useToast();
 
   const handleLedClick = (x: number, y: number) => {
-    setLeds([...leds, { 
-      x, 
-      y, 
-      color: "#ff0000", 
-      brightness: 1,
-      size: 12,
-      blinkSpeed: 0
-    }]);
+    // Check if point is within triangle before adding LED
+    const triangleHeight = height;
+    const triangleBase = width;
+    
+    // Calculate point position relative to triangle
+    const px = x;
+    const py = y;
+    
+    // Calculate barycentric coordinates
+    const alpha = (triangleBase/2 * (triangleHeight - py) - (px - triangleBase/2) * triangleHeight) / (triangleBase/2 * triangleHeight);
+    const beta = ((px - triangleBase/2) * triangleHeight) / (triangleBase/2 * triangleHeight);
+    
+    if (alpha >= 0 && beta >= 0 && (alpha + beta) <= 1) {
+      setLeds([...leds, { 
+        x, 
+        y, 
+        color: "#ff0000", 
+        brightness: 1,
+        size: 12,
+        blinkSpeed: 0
+      }]);
+    }
   };
 
   const handleLedRemove = (index: number) => {
@@ -50,30 +67,32 @@ const Index = () => {
 
   const handleAutoPlace = () => {
     const newLeds: LED[] = [];
-    const numLeds = Math.floor((width * height) / 10000); // Approximate number based on tree size
+    const numLeds = Math.floor((width * height) / 5000); // Increased number of LEDs
     
     for (let i = 0; i < numLeds; i++) {
-      const x = Math.random() * width;
-      const y = Math.random() * height;
+      let validPoint = false;
+      let x, y;
       
-      // Check if point is within triangle
-      const triangleHeight = height;
-      const triangleBase = width;
-      const triangleArea = (triangleBase * triangleHeight) / 2;
-      
-      const area1 = (width/2 * y) / 2;
-      const area2 = ((width - x) * (height - y)) / 2;
-      const area3 = (x * (height - y)) / 2;
-      
-      if (Math.abs(area1 + area2 + area3 - triangleArea) < 0.1) {
-        newLeds.push({
-          x,
-          y,
-          color: `hsl(${Math.random() * 360}, 100%, 50%)`,
-          brightness: 1,
-          size: 12,
-          blinkSpeed: Math.random() * 2 + 1
-        });
+      // Keep trying until we find a valid point within the triangle
+      while (!validPoint) {
+        x = Math.random() * width;
+        y = Math.random() * height;
+        
+        // Calculate barycentric coordinates
+        const alpha = (width/2 * (height - y) - (x - width/2) * height) / (width/2 * height);
+        const beta = ((x - width/2) * height) / (width/2 * height);
+        
+        if (alpha >= 0 && beta >= 0 && (alpha + beta) <= 1) {
+          validPoint = true;
+          newLeds.push({
+            x,
+            y,
+            color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+            brightness: Math.random() * 0.5 + 0.5, // Random brightness between 0.5 and 1
+            size: Math.floor(Math.random() * 8) + 8, // Random size between 8 and 16
+            blinkSpeed: Math.random() * 2 + 1 // Random blink speed between 1 and 3 seconds
+          });
+        }
       }
     }
     
@@ -117,26 +136,49 @@ const Index = () => {
   return (
     <div className="min-h-screen p-4 flex flex-col items-center">
       <h1 className="text-2xl font-bold mb-8">Christmas Tree LED Simulator</h1>
-      <div className="flex-1 w-full flex justify-center items-start mb-32">
-        <TreeCanvas
-          width={width}
-          height={height}
-          onLedClick={handleLedClick}
-          leds={leds}
-          onLedRemove={handleLedRemove}
-          onLedUpdate={handleLedUpdate}
-        />
+      <div className="flex-1 w-full flex flex-col items-center gap-4">
+        <Button
+          variant="outline"
+          onClick={() => setShowControls(!showControls)}
+          className="mb-2"
+        >
+          {showControls ? (
+            <>
+              Hide Controls <ChevronUp className="ml-2" />
+            </>
+          ) : (
+            <>
+              Show Controls <ChevronDown className="ml-2" />
+            </>
+          )}
+        </Button>
+        
+        {showControls && (
+          <div className="w-full max-w-xl mb-4">
+            <Controls
+              width={width}
+              height={height}
+              onWidthChange={setWidth}
+              onHeightChange={setHeight}
+              onSave={handleSave}
+              onLoad={handleLoad}
+              onClear={handleClear}
+              onAutoPlace={handleAutoPlace}
+            />
+          </div>
+        )}
+        
+        <div className="mb-32">
+          <TreeCanvas
+            width={width}
+            height={height}
+            onLedClick={handleLedClick}
+            leds={leds}
+            onLedRemove={handleLedRemove}
+            onLedUpdate={handleLedUpdate}
+          />
+        </div>
       </div>
-      <Controls
-        width={width}
-        height={height}
-        onWidthChange={setWidth}
-        onHeightChange={setHeight}
-        onSave={handleSave}
-        onLoad={handleLoad}
-        onClear={handleClear}
-        onAutoPlace={handleAutoPlace}
-      />
     </div>
   );
 };

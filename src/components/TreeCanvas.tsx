@@ -1,14 +1,8 @@
 import React, { useState } from 'react';
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
-import { Settings2, Zap } from "lucide-react";
 
 interface TreeCanvasProps {
   width: number;
@@ -62,10 +56,10 @@ export const TreeCanvas: React.FC<TreeCanvasProps> = ({
       onClick={handleCanvasClick}
     >
       {leds.map((led, index) => (
-        <div key={index} className="relative">
+        <div key={index} className="relative" style={{ zIndex: selectedLed === index ? 50 : 1 }}>
           <div
             className={cn(
-              "led absolute cursor-pointer",
+              "led absolute cursor-pointer rounded-full",
               selectedLed === index && "ring-2 ring-white",
               led.blinkSpeed && "animate-led-pulse"
             )}
@@ -77,17 +71,22 @@ export const TreeCanvas: React.FC<TreeCanvasProps> = ({
               width: `${led.size || 12}px`,
               height: `${led.size || 12}px`,
               transform: 'translate(-50%, -50%)',
-              animationDuration: led.blinkSpeed ? `${led.blinkSpeed}s` : '2s'
+              animationDuration: led.blinkSpeed ? `${led.blinkSpeed}s` : '2s',
+              zIndex: selectedLed === index ? 51 : 1
             }}
             onClick={(e) => handleLedClick(index, e)}
           />
           
           {selectedLed === index && (
-            <div className="absolute z-20 bg-card p-4 rounded-lg shadow-xl" style={{
-              left: `${led.x + 20}px`,
-              top: `${led.y}px`,
-              minWidth: '200px'
-            }}>
+            <div 
+              className="absolute z-[52] bg-card p-4 rounded-lg shadow-xl"
+              style={{
+                left: `${led.x + 20}px`,
+                top: `${led.y}px`,
+                minWidth: '200px'
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="space-y-4">
                 <div>
                   <label className="text-sm font-medium block mb-2">Color</label>
@@ -100,7 +99,7 @@ export const TreeCanvas: React.FC<TreeCanvasProps> = ({
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium block mb-2">Brightness</label>
+                  <label className="text-sm font-medium block mb-2">Brightness ({Math.round((led.brightness || 1) * 100)}%)</label>
                   <Slider
                     value={[led.brightness || 1]}
                     onValueChange={(values) => onLedUpdate?.(index, { brightness: values[0] })}
@@ -112,7 +111,7 @@ export const TreeCanvas: React.FC<TreeCanvasProps> = ({
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium block mb-2">Size</label>
+                  <label className="text-sm font-medium block mb-2">Size ({led.size || 12}px)</label>
                   <Slider
                     value={[led.size || 12]}
                     onValueChange={(values) => onLedUpdate?.(index, { size: values[0] })}
@@ -124,7 +123,7 @@ export const TreeCanvas: React.FC<TreeCanvasProps> = ({
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium block mb-2">Blink Speed (seconds)</label>
+                  <label className="text-sm font-medium block mb-2">Blink Speed ({led.blinkSpeed || 0}s)</label>
                   <Slider
                     value={[led.blinkSpeed || 0]}
                     onValueChange={(values) => onLedUpdate?.(index, { blinkSpeed: values[0] })}
