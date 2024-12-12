@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { TreeCanvas } from "@/components/TreeCanvas";
 import { Controls } from "@/components/Controls";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 interface LED {
   x: number;
   y: number;
   color: string;
   brightness?: number;
+  size?: number;
+  blinkSpeed?: number;
 }
 
 const Index = () => {
@@ -17,7 +19,14 @@ const Index = () => {
   const { toast } = useToast();
 
   const handleLedClick = (x: number, y: number) => {
-    setLeds([...leds, { x, y, color: "#ff0000", brightness: 1 }]);
+    setLeds([...leds, { 
+      x, 
+      y, 
+      color: "#ff0000", 
+      brightness: 1,
+      size: 12,
+      blinkSpeed: 0
+    }]);
   };
 
   const handleLedRemove = (index: number) => {
@@ -37,6 +46,42 @@ const Index = () => {
       return led;
     });
     setLeds(newLeds);
+  };
+
+  const handleAutoPlace = () => {
+    const newLeds: LED[] = [];
+    const numLeds = Math.floor((width * height) / 10000); // Approximate number based on tree size
+    
+    for (let i = 0; i < numLeds; i++) {
+      const x = Math.random() * width;
+      const y = Math.random() * height;
+      
+      // Check if point is within triangle
+      const triangleHeight = height;
+      const triangleBase = width;
+      const triangleArea = (triangleBase * triangleHeight) / 2;
+      
+      const area1 = (width/2 * y) / 2;
+      const area2 = ((width - x) * (height - y)) / 2;
+      const area3 = (x * (height - y)) / 2;
+      
+      if (Math.abs(area1 + area2 + area3 - triangleArea) < 0.1) {
+        newLeds.push({
+          x,
+          y,
+          color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+          brightness: 1,
+          size: 12,
+          blinkSpeed: Math.random() * 2 + 1
+        });
+      }
+    }
+    
+    setLeds(newLeds);
+    toast({
+      title: "Auto-placement complete",
+      description: `Added ${newLeds.length} LEDs to the tree.`,
+    });
   };
 
   const handleSave = () => {
@@ -90,6 +135,7 @@ const Index = () => {
         onSave={handleSave}
         onLoad={handleLoad}
         onClear={handleClear}
+        onAutoPlace={handleAutoPlace}
       />
     </div>
   );

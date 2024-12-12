@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { Input } from "@/components/ui/input";
+import { Wand2, Save, Upload, Trash2 } from "lucide-react";
 
 interface ControlsProps {
   width: number;
@@ -11,6 +11,7 @@ interface ControlsProps {
   onSave: () => void;
   onLoad: () => void;
   onClear: () => void;
+  onAutoPlace?: () => void;
 }
 
 export const Controls: React.FC<ControlsProps> = ({
@@ -20,7 +21,8 @@ export const Controls: React.FC<ControlsProps> = ({
   onHeightChange,
   onSave,
   onLoad,
-  onClear
+  onClear,
+  onAutoPlace
 }) => {
   return (
     <div className="controls-panel space-y-4">
@@ -48,10 +50,23 @@ export const Controls: React.FC<ControlsProps> = ({
           <span className="text-xs text-muted-foreground">{height}px</span>
         </div>
       </div>
-      <div className="flex gap-2">
-        <Button onClick={onSave} className="flex-1">Save Configuration</Button>
-        <Button onClick={onLoad} variant="secondary" className="flex-1">Load Configuration</Button>
-        <Button onClick={onClear} variant="destructive" className="flex-1">Clear All LEDs</Button>
+      <div className="grid grid-cols-2 gap-2">
+        <Button onClick={onAutoPlace} className="flex items-center gap-2">
+          <Wand2 className="w-4 h-4" />
+          Auto Place LEDs
+        </Button>
+        <Button onClick={onSave} className="flex items-center gap-2">
+          <Save className="w-4 h-4" />
+          Save Config
+        </Button>
+        <Button onClick={onLoad} variant="secondary" className="flex items-center gap-2">
+          <Upload className="w-4 h-4" />
+          Load Config
+        </Button>
+        <Button onClick={onClear} variant="destructive" className="flex items-center gap-2">
+          <Trash2 className="w-4 h-4" />
+          Clear All
+        </Button>
       </div>
     </div>
   );

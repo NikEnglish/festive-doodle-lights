@@ -25,12 +25,12 @@
 }
 
 .led {
-  @apply w-4 h-4 rounded-full cursor-pointer transition-all duration-300;
+  @apply rounded-full cursor-pointer transition-all duration-300;
   box-shadow: 0 0 10px currentColor;
 }
 
 .led:hover {
-  transform: scale(1.2);
+  transform: scale(1.2) translate(-50%, -50%) !important;
 }
 
 .controls-panel {
