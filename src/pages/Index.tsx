@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { TreeCanvas } from "@/components/TreeCanvas";
 import { Controls } from "@/components/Controls";
 import { useToast } from "@/components/ui/use-toast";
@@ -7,6 +7,7 @@ interface LED {
   x: number;
   y: number;
   color: string;
+  brightness?: number;
 }
 
 const Index = () => {
@@ -16,12 +17,30 @@ const Index = () => {
   const { toast } = useToast();
 
   const handleLedClick = (x: number, y: number) => {
-    setLeds([...leds, { x, y, color: "#E53E3E" }]);
+    setLeds([...leds, { x, y, color: "#ff0000", brightness: 1 }]);
+  };
+
+  const handleLedRemove = (index: number) => {
+    const newLeds = leds.filter((_, i) => i !== index);
+    setLeds(newLeds);
+    toast({
+      title: "LED removed",
+      description: "The LED has been removed from the tree.",
+    });
+  };
+
+  const handleLedUpdate = (index: number, updates: Partial<LED>) => {
+    const newLeds = leds.map((led, i) => {
+      if (i === index) {
+        return { ...led, ...updates };
+      }
+      return led;
+    });
+    setLeds(newLeds);
   };
 
   const handleSave = () => {
-    const data = { width, height, leds };
-    localStorage.setItem("tree-config", JSON.stringify(data));
+    localStorage.setItem("tree-config", JSON.stringify({ width, height, leds }));
     toast({
       title: "Configuration saved",
       description: "Your tree configuration has been saved successfully.",
@@ -59,6 +78,8 @@ const Index = () => {
           height={height}
           onLedClick={handleLedClick}
           leds={leds}
+          onLedRemove={handleLedRemove}
+          onLedUpdate={handleLedUpdate}
         />
       </div>
       <Controls
