@@ -4,6 +4,7 @@ import { Controls } from "@/components/Controls";
 import { useToast } from "@/hooks/use-toast";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface LED {
   x: number;
@@ -20,6 +21,7 @@ const Index = () => {
   const [leds, setLeds] = useState<LED[]>([]);
   const [showControls, setShowControls] = useState(true);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const handleLedClick = (x: number, y: number) => {
     // Check if point is within triangle before adding LED
@@ -133,14 +135,35 @@ const Index = () => {
     });
   };
 
+  // Calculate responsive dimensions
+  const getResponsiveDimensions = () => {
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const isLandscape = viewportWidth > viewportHeight;
+    
+    if (isLandscape) {
+      return {
+        maxWidth: Math.min(viewportHeight * 0.6, width),
+        maxHeight: Math.min(viewportHeight * 0.8, height)
+      };
+    }
+    
+    return {
+      maxWidth: Math.min(viewportWidth * 0.8, width),
+      maxHeight: Math.min(viewportHeight * 0.6, height)
+    };
+  };
+
+  const { maxWidth, maxHeight } = getResponsiveDimensions();
+
   return (
     <div className="min-h-screen p-4 flex flex-col items-center">
-      <h1 className="text-2xl font-bold mb-8">Christmas Tree LED Simulator</h1>
+      <h1 className="text-xl md:text-2xl font-bold mb-4 md:mb-8">Christmas Tree LED Simulator</h1>
       <div className="flex-1 w-full flex flex-col items-center gap-4">
         <Button
           variant="outline"
           onClick={() => setShowControls(!showControls)}
-          className="mb-2"
+          className="mb-2 w-full md:w-auto"
         >
           {showControls ? (
             <>
@@ -168,7 +191,10 @@ const Index = () => {
           </div>
         )}
         
-        <div className="mb-32">
+        <div className={`mb-32 ${isMobile ? "" : "scale-100"}`} style={{ 
+          transform: `scale(${Math.min(maxWidth/width, maxHeight/height)})`,
+          transformOrigin: 'top center'
+        }}>
           <TreeCanvas
             width={width}
             height={height}
