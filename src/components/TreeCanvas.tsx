@@ -46,18 +46,19 @@ export const TreeCanvas: React.FC<TreeCanvasProps> = ({
   };
 
   return (
-    <div 
-      className="tree-container relative bg-background/50 rounded-lg border-2 border-primary"
-      style={{ 
-        width: `${width}px`, 
-        height: `${height}px`,
-        clipPath: `polygon(50% 0%, 0% 100%, 100% 100%)`,
-      }}
-      onClick={handleCanvasClick}
-    >
-      {leds.map((led, index) => (
-        <div key={index} className="relative" style={{ zIndex: selectedLed === index ? 50 : 1 }}>
+    <div className="relative">
+      <div 
+        className="tree-container relative bg-background/50 rounded-lg border-2 border-primary"
+        style={{ 
+          width: `${width}px`, 
+          height: `${height}px`,
+          clipPath: `polygon(50% 0%, 0% 100%, 100% 100%)`,
+        }}
+        onClick={handleCanvasClick}
+      >
+        {leds.map((led, index) => (
           <div
+            key={index}
             className={cn(
               "led absolute cursor-pointer rounded-full",
               selectedLed === index && "ring-2 ring-white",
@@ -76,80 +77,79 @@ export const TreeCanvas: React.FC<TreeCanvasProps> = ({
             }}
             onClick={(e) => handleLedClick(index, e)}
           />
-          
-          {selectedLed === index && (
-            <div 
-              className="fixed bg-card p-4 rounded-lg shadow-xl"
-              style={{
-                left: `${led.x + 20}px`,
-                top: `${led.y}px`,
-                minWidth: '200px',
-                zIndex: 1000,
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium block mb-2">Color</label>
-                  <Input
-                    type="color"
-                    value={led.color}
-                    onChange={(e) => onLedUpdate?.(index, { color: e.target.value })}
-                    className="h-10 w-full cursor-pointer"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium block mb-2">Brightness ({Math.round((led.brightness || 1) * 100)}%)</label>
-                  <Slider
-                    value={[led.brightness || 1]}
-                    onValueChange={(values) => onLedUpdate?.(index, { brightness: values[0] })}
-                    min={0}
-                    max={1}
-                    step={0.1}
-                    className="w-full"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium block mb-2">Size ({led.size || 12}px)</label>
-                  <Slider
-                    value={[led.size || 12]}
-                    onValueChange={(values) => onLedUpdate?.(index, { size: values[0] })}
-                    min={4}
-                    max={24}
-                    step={2}
-                    className="w-full"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium block mb-2">Blink Speed ({led.blinkSpeed || 0}s)</label>
-                  <Slider
-                    value={[led.blinkSpeed || 0]}
-                    onValueChange={(values) => onLedUpdate?.(index, { blinkSpeed: values[0] })}
-                    min={0}
-                    max={5}
-                    step={0.5}
-                    className="w-full"
-                  />
-                </div>
-
-                <Button 
-                  variant="destructive"
-                  onClick={() => {
-                    onLedRemove?.(index);
-                    setSelectedLed(null);
-                  }}
-                  className="w-full"
-                >
-                  Remove LED
-                </Button>
-              </div>
+        ))}
+      </div>
+      
+      {selectedLed !== null && leds[selectedLed] && (
+        <div 
+          className="fixed bg-card p-4 rounded-lg shadow-xl z-[1000]"
+          style={{
+            left: `${leds[selectedLed].x + 20}px`,
+            top: `${leds[selectedLed].y}px`,
+            minWidth: '200px',
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium block mb-2">Color</label>
+              <Input
+                type="color"
+                value={leds[selectedLed].color}
+                onChange={(e) => onLedUpdate?.(selectedLed, { color: e.target.value })}
+                className="h-10 w-full cursor-pointer"
+              />
             </div>
-          )}
+
+            <div>
+              <label className="text-sm font-medium block mb-2">Brightness ({Math.round((leds[selectedLed].brightness || 1) * 100)}%)</label>
+              <Slider
+                value={[leds[selectedLed].brightness || 1]}
+                onValueChange={(values) => onLedUpdate?.(selectedLed, { brightness: values[0] })}
+                min={0}
+                max={1}
+                step={0.1}
+                className="w-full"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium block mb-2">Size ({leds[selectedLed].size || 12}px)</label>
+              <Slider
+                value={[leds[selectedLed].size || 12]}
+                onValueChange={(values) => onLedUpdate?.(selectedLed, { size: values[0] })}
+                min={4}
+                max={24}
+                step={2}
+                className="w-full"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium block mb-2">Blink Speed ({leds[selectedLed].blinkSpeed || 0}s)</label>
+              <Slider
+                value={[leds[selectedLed].blinkSpeed || 0]}
+                onValueChange={(values) => onLedUpdate?.(selectedLed, { blinkSpeed: values[0] })}
+                min={0}
+                max={5}
+                step={0.5}
+                className="w-full"
+              />
+            </div>
+
+            <Button 
+              variant="destructive"
+              onClick={() => {
+                onLedRemove?.(selectedLed);
+                setSelectedLed(null);
+              }}
+              className="w-full"
+            >
+              Remove LED
+            </Button>
+          </div>
         </div>
-      ))}
+      )}
     </div>
   );
 };
