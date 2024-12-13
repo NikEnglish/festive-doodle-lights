@@ -56,7 +56,11 @@ export const TreeCanvas: React.FC<TreeCanvasProps> = ({
       onClick={handleCanvasClick}
     >
       {leds.map((led, index) => (
-        <div key={index} className="relative" style={{ zIndex: selectedLed === index ? 50 : 1 }}>
+        <div key={index} className="absolute" style={{ 
+          left: `${led.x}px`,
+          top: `${led.y}px`,
+          zIndex: selectedLed === index ? 50 : 1,
+        }}>
           <div
             className={cn(
               "led absolute cursor-pointer rounded-full",
@@ -64,26 +68,24 @@ export const TreeCanvas: React.FC<TreeCanvasProps> = ({
               led.blinkSpeed && "animate-led-pulse"
             )}
             style={{
-              left: `${led.x}px`,
-              top: `${led.y}px`,
               backgroundColor: led.color,
               opacity: led.brightness || 1,
               width: `${led.size || 12}px`,
               height: `${led.size || 12}px`,
               transform: 'translate(-50%, -50%)',
               animationDuration: led.blinkSpeed ? `${led.blinkSpeed}s` : '2s',
-              zIndex: selectedLed === index ? 51 : 1
             }}
             onClick={(e) => handleLedClick(index, e)}
           />
           
           {selectedLed === index && (
             <div 
-              className="absolute z-[52] bg-card p-4 rounded-lg shadow-xl"
+              className="fixed bg-card p-4 rounded-lg shadow-xl"
               style={{
                 left: `${led.x + 20}px`,
                 top: `${led.y}px`,
-                minWidth: '200px'
+                minWidth: '200px',
+                zIndex: 1000,
               }}
               onClick={(e) => e.stopPropagation()}
             >
